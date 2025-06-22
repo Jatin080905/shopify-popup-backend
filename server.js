@@ -1,3 +1,5 @@
+const cors = require('cors');
+app.use(cors());
 const express = require('express'); // A tool to create the server
 const bodyParser = require('body-parser'); // Helps read form data
 const axios = require('axios'); // Sends info to Shopify
