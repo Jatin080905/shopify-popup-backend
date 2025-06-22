@@ -1,46 +1,56 @@
+const express = require('express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
-app.use(cors());
-const express = require('express'); // A tool to create the server
-const bodyParser = require('body-parser'); // Helps read form data
-const axios = require('axios'); // Sends info to Shopify
+const axios = require('axios');
 
 const app = express();
+const port = process.env.PORT || 3000;
+
+// Enable CORS for all origins (including your Shopify store)
+app.use(cors());
+
+// Parse JSON request bodies
 app.use(bodyParser.json());
 
-// Set your store info here
-const SHOPIFY_STORE = process.env.SHOPIFY_STORE;
-const SHOPIFY_TOKEN = process.env.SHOPIFY_TOKEN;
+// Shopify API variables
+const SHOPIFY_API_URL = 'https://6bbnvk-y9.myshopify.com/admin/api/2024-04/customers.json';
+const SHOPIFY_ACCESS_TOKEN = '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'; // Use your full API token here
 
+// Create new customer
 app.post('/create-customer', async (req, res) => {
   const { name, email } = req.body;
-  const [first_name, ...rest] = name.split(' ');
-  const last_name = rest.join(' ');
-  
+
   try {
-    await axios.post(
-      `https://${SHOPIFY_STORE}/admin/api/2023-10/customers.json`,
+    const response = await axios.post(
+      SHOPIFY_API_URL,
       {
         customer: {
-          first_name,
-          last_name,
-          email,
-          tags: 'popup-form'
+          first_name: name,
+          email: email,
+          tags: 'popup-signup'
         }
       },
       {
         headers: {
-          'X-Shopify-Access-Token': SHOPIFY_TOKEN,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-Shopify-Access-Token': SHOPIFY_ACCESS_TOKEN
         }
       }
     );
-    
-    res.json({ success: true, message: 'Customer created!' });
+
+    console.log('Customer created:', response.data);
+    res.status(200).json({ success: true });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to create customer' });
+    console.error('Error creating customer:', error.response ? error.response.data : error.message);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-app.listen(3000, () => {
-  console.log('Listening on http://localhost:3000');
+// Health check
+app.get('/', (req, res) => {
+  res.send('Popup Backend is live!');
+});
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
