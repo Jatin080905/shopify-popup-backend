@@ -1,18 +1,24 @@
-const express = require('express'); // A tool to create the server
-const bodyParser = require('body-parser'); // Helps read form data
-const axios = require('axios'); // Sends info to Shopify
+const express = require('express');
+const bodyParser = require('body-parser');
+const axios = require('axios');
+const cors = require('cors');
 
 const app = express();
 app.use(bodyParser.json());
 
-// Set your store info here
+// CORS Setup - allow Shopify store
+app.use(cors({
+  origin: 'https://6bbnvk-y9.myshopify.com',
+  credentials: true
+}));
+
+// Set your store info
 const SHOPIFY_STORE = process.env.SHOPIFY_STORE;
 const SHOPIFY_TOKEN = process.env.SHOPIFY_TOKEN;
 
 app.post('/create-customer', async (req, res) => {
   const { name, first_name, last_name, email } = req.body;
 
-  // Handle both "name" or "first_name"/"last_name"
   const fName = first_name || (name ? name.split(' ')[0] : '');
   const lName = last_name || (name ? name.split(' ').slice(1).join(' ') : '');
 
@@ -46,6 +52,7 @@ app.post('/create-customer', async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log('Listening on http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
 });
