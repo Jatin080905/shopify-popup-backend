@@ -10,17 +10,23 @@ const SHOPIFY_STORE = process.env.SHOPIFY_STORE;
 const SHOPIFY_TOKEN = process.env.SHOPIFY_TOKEN;
 
 app.post('/create-customer', async (req, res) => {
-  const { name, email } = req.body;
-  const [first_name, ...rest] = name.split(' ');
-  const last_name = rest.join(' ');
-  
+  const { name, first_name, last_name, email } = req.body;
+
+  // Handle both "name" or "first_name"/"last_name"
+  const fName = first_name || (name ? name.split(' ')[0] : '');
+  const lName = last_name || (name ? name.split(' ').slice(1).join(' ') : '');
+
+  if (!email || !fName) {
+    return res.status(400).json({ success: false, message: "Missing required fields" });
+  }
+
   try {
     await axios.post(
       `https://${SHOPIFY_STORE}/admin/api/2023-10/customers.json`,
       {
         customer: {
-          first_name,
-          last_name,
+          first_name: fName,
+          last_name: lName,
           email,
           tags: 'popup-form'
         }
@@ -32,9 +38,10 @@ app.post('/create-customer', async (req, res) => {
         }
       }
     );
-    
+
     res.json({ success: true, message: 'Customer created!' });
   } catch (error) {
+    console.error('Shopify API Error:', error.response?.data || error.message);
     res.status(500).json({ success: false, message: 'Failed to create customer' });
   }
 });
