@@ -8,7 +8,11 @@ app.use(bodyParser.json());
 
 // CORS Setup - allow Shopify store
 app.use(cors({
-  origin: 'https://6bbnvk-y9.myshopify.com',
+  origin: [
+  'https://sculptartisans.co.in',
+  'https://6bbnvk-y9.myshopify.com'
+],
+
   credentials: true
 }));
 
