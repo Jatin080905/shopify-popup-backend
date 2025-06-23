@@ -32,22 +32,25 @@ app.post('/create-customer', async (req, res) => {
 
   try {
     await axios.post(
-      `https://${SHOPIFY_STORE}/admin/api/2023-10/customers.json`,
-      {
-        customer: {
-          first_name: fName,
-          last_name: lName,
-          email,
-          tags: 'popup-form'
-        }
-      },
-      {
-        headers: {
-          'X-Shopify-Access-Token': SHOPIFY_TOKEN,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+  `https://${SHOPIFY_STORE}/admin/api/2023-10/customers.json`,
+  {
+    customer: {
+      first_name: fName,
+      last_name: lName,
+      email,
+      tags: 'popup-form',
+      accepts_marketing: true,
+      marketing_opt_in_level: 'single_opt_in'
+    }
+  },
+  {
+    headers: {
+      'X-Shopify-Access-Token': SHOPIFY_TOKEN,
+      'Content-Type': 'application/json'
+    }
+  }
+);
+
 
     res.json({ success: true, message: 'Customer created!' });
  } catch (error) {
