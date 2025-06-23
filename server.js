@@ -50,10 +50,19 @@ app.post('/create-customer', async (req, res) => {
     );
 
     res.json({ success: true, message: 'Customer created!' });
-  } catch (error) {
-    console.error('Shopify API Error:', error.response?.data || error.message);
-    res.status(500).json({ success: false, message: 'Failed to create customer' });
+ } catch (error) {
+  const errData = error.response?.data;
+
+  console.error('Shopify API Error:', errData || error.message);
+
+  // Handle duplicate email error
+  if (errData?.errors?.email?.includes('has already been taken')) {
+    return res.status(409).json({ success: false, message: 'Email already subscribed' });
   }
+
+  res.status(500).json({ success: false, message: 'Failed to create customer' });
+}
+
 });
 
 const PORT = process.env.PORT || 3000;
